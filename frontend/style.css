@@ -1,0 +1,26 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+input, button {
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+button {
+  margin-left: 0.5rem;
+}
+
+ul {
+  margin-top: 1rem;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
+}
