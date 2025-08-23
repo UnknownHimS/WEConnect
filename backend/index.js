@@ -1,3 +1,6 @@
+// Load environment variables from backend/config/postgre.env
+require('dotenv').config({ path: __dirname + '/postgre.env' });
+
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -6,12 +9,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// PostgreSQL connection using the DATABASE_URL env var
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-// Create table if not exists (run on server start)
+// Create users table if not exists
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -19,7 +25,7 @@ pool.query(`
   );
 `).catch(console.error);
 
-// API to get all users
+// GET all users
 app.get('/api/users', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users ORDER BY id');
@@ -29,7 +35,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-// API to add a new user
+// POST a new user
 app.post('/api/users', async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
@@ -46,4 +52,6 @@ app.post('/api/users', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});
