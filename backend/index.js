@@ -41,7 +41,7 @@ app.post(LOGIN_ROUTE, (req, res) => {
   if (role) {
     // If the role is 'ceo', redirect to the CEO dashboard
     if (role === 'ceo') {
-      return res.redirect('/mceo-dashboard.html');
+      return res.redirect('https://weconnectf.onrender.com/mceo-dashboard.html');
     }
     else if (role === 'manager') {
       return res.redirect('/mmanager-dashboard.html');
