@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadUsers = async () => {
     loadingMessage.textContent = 'Loading users...'; // Show loading message
     try {
-      const res = await fetch('/api/users');
+      const res = await fetch('https://weconnectb.onrender.com/api/users');
       if (!res.ok) {
         throw new Error('Failed to fetch users');
       }
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!name) return;
 
     try {
-      const res = await fetch('/api/users', {
+      const res = await fetch('https://weconnectb.onrender.com/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
