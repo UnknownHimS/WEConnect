@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><title>Manager Dashboard</title></head>
+<body>
+  <h1>Manager Dashboard</h1>
+  <button id="load-data">Load Sensitive Data</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function loadData() {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      if (!role) {
+        alert('Role not found, please login again.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:3000/manager/data?role=${role}`);
+        if (!res.ok) throw new Error('Access denied or error fetching data');
+
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById('load-data').onclick = loadData;
+  </script>
+</body>
+</html>
