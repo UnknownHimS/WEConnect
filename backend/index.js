@@ -48,16 +48,19 @@ app.post(LOGIN_ROUTE, (req, res) => {
   if (role) {
     // If the role is 'ceo', redirect to the CEO dashboard
     if (role === 'ceo') {
-      return res.redirect('/mceo-dashboard.html');
+      window.location.href = `/mceo-dashboard.html`;
     }
     else if (role === 'manager'){
-      return res.redirect('/mmanager-dashboard.html');
+      window.location.href = `/mmanager-dashboard.html`;
+
     }
     else if (role === 'artist'){
-      return res.redirect('/martist-dashboard.html');
+     window.location.href = `/martist-dashboard.html`;
+
     }
     else if (role === 'reporter'){
-      return res.redirect('/mreporter-dashboard.html');
+      window.location.href = `/mreporter-dashboard.html`;
+
     }
 
     // Otherwise, redirect to the generic roles page
