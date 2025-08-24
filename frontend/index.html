@@ -2,22 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Dashboard</title>
+  <title>Home</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Add User</h1>
-  <form id="user-form">
-    <input type="text" id="name" placeholder="Enter user name" required />
-    <button type="submit">Add User</button>
+  <h1>Visitors Name</h1>
+  
+  <!-- Form to add user's name -->
+  <form id="visitor-form">
+    <input type="text" id="visitor-name" placeholder="Enter your name" required />
+    <button type="submit">Add Name</button>
   </form>
 
-  <h1>🔐 Login</h1>
+  <!-- Login Form for staff -->
+  <h1>🔐 Staff Login</h1>
   <form id="login-form">
-    <input type="password" id="password" name="password" placeholder="Enter your password" required />
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="login-password" placeholder="Enter your password" required />
     <button type="submit">Login</button>
   </form>
 
-  <script src="script.js"></script> <!-- General script for both forms -->
+  <script src="script.js"></script>
 </body>
 </html>
