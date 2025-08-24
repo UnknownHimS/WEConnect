@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './mine.env' });
+require('dotenv').config({ path: __dirname + '/mine.env.env' });
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -30,5 +30,6 @@ app.post(LOGIN_ROUTE, (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 
