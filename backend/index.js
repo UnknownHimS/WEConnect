@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());  // Express's built-in JSON parser
 app.use(express.urlencoded({ extended: false })); // Express's built-in URL-encoded parser
-app.use('../frontend', express.static(path.join(__dirname, '../backend')));
+app.use('../backend', express.static(path.join(__dirname, '../frontend')));
 
 // PostgreSQL setup
 const pool = new Pool({
