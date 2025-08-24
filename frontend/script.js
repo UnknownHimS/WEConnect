@@ -1,21 +1,4 @@
-const API_URL = 'https://weconnectb.onrender.com';  // Replace with your backend URL once deployed
-
-// Handle adding a visitor
-document.getElementById('user-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  if (!name) return;
-
-  const res = await fetch(`${API_URL}/api/visitor`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name })
-  });
-
-  const data = await res.json();
-  alert(data.message);  // Show success/error message
-  document.getElementById('name').value = '';  // Clear the input field
-});
+const API_URL = 'https://your-backend-url.onrender.com';  // Update this after deploying backend
 
 // Handle login form submission
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -39,3 +22,19 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   }
 });
 
+// Handle adding visitor name
+document.getElementById('user-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  if (!name) return;
+
+  const res = await fetch(`${API_URL}/api/visitor`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await res.json();
+  document.getElementById('message').innerText = data.message;  // Show success/error message
+  document.getElementById('name').value = '';  // Clear input
+});
