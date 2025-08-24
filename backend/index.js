@@ -1,5 +1,5 @@
-// Load env variables
 require('dotenv').config({ path: __dirname + '/mine.env' });
+
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
