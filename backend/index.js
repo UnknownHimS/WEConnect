@@ -4,14 +4,15 @@ const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
+const cookieParser = require('cookie-parser'); // Add cookie parser
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());  // Express's built-in JSON parser
+app.use(express.json()); // Express's built-in JSON parser
 app.use(express.urlencoded({ extended: false })); // Express's built-in URL-encoded parser
+app.use(cookieParser()); // Add cookie-parser for reading cookies
 
 // PostgreSQL setup
 const pool = new Pool({
@@ -66,10 +67,13 @@ app.post(LOGIN_ROUTE, (req, res) => {
   res.status(401).send('<h2>❌ Access denied</h2>');
 });
 
+// Serve static files (frontend)
+app.use(express.static('frontend'));
+
 // Protected Route: Dashboard URL
 app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
   if (req.user.role === 'ceo') {
-    res.sendFile(path.join(__dirname, 'mceo-dashboard.html')); // Serve the CEO dashboard
+    res.sendFile(path.join(__dirname, 'frontend/mceo-dashboard.html')); // Serve the CEO dashboard
   } else {
     res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
   }
@@ -78,7 +82,7 @@ app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
 // Similarly, for other roles
 app.get('/mmanager-dashboard.html', verifyToken, (req, res) => {
   if (req.user.role === 'manager') {
-    res.sendFile(path.join(__dirname, 'mmanager-dashboard.html'));
+    res.sendFile(path.join(__dirname, 'frontend/mmanager-dashboard.html'));
   } else {
     res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
   }
