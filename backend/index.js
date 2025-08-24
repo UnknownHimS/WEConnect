@@ -1,7 +1,7 @@
+require('dotenv').config(); 
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { Client } = require('pg');
-require('dotenv').config(); // Load environment variables
 const cors = require('cors'); // Enable CORS support
 
 const app = express();
