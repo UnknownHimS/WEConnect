@@ -3,23 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visitor and Login</title>
+  <title>Login & Visitor Registration</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <h1>Visitors Name: </h1>
-  <form id="user-form">
-    <input type="text" id="name" placeholder="Enter visitor name" required />
-    <button type="submit">Add Visitor</button>
-  </form>
-
-  <h1>🔐 Login</h1>
+  <h1>Login to Access Dashboard</h1>
   <form id="login-form">
     <input type="text" id="username" placeholder="Enter your username" required />
     <input type="password" id="password" placeholder="Enter your password" required />
     <button type="submit">Login</button>
   </form>
+
+  <h1>Visitors Name:</h1>
+  <form id="user-form">
+    <input type="text" id="name" placeholder="Enter visitor name" required />
+    <button type="submit">Add Visitor</button>
+  </form>
+
+  <p id="message"></p>
 
   <script src="script.js"></script>
 </body>
