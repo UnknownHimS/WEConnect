@@ -1,5 +1,4 @@
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-
+require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
@@ -42,8 +41,11 @@ const roles = {
 // LOGIN ROUTE
 app.post(LOGIN_ROUTE, (req, res) => {
   const { password } = req.body;
+  console.log('Login attempt:', password);
 
   const role = roles[password];
+  console.log('Matched role:', role);
+
   if (role) {
     return res.redirect(`/roles.html?role=${role}`);
   }
