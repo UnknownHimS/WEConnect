@@ -1,19 +1,17 @@
 require('dotenv').config();
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
-const bodyParser = require('body-parser');
-const cors = require('cors');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());  // Express's built-in JSON parser
+app.use(express.urlencoded({ extended: false })); // Express's built-in URL-encoded parser
 app.use('../frontend', express.static(path.join(__dirname, '../backend')));
-
-
 
 // PostgreSQL setup
 const pool = new Pool({
@@ -30,6 +28,17 @@ const roles = {
   [process.env.REPORTER]: 'reporter',
 };
 
+// Predefined redirect URLs
+const redirectUrls = {
+  ceo: '/mceo-dashboard.html',
+  manager: '/mmanager-dashboard.html',
+  artist: '/martist-dashboard.html',
+  reporter: '/mreporter-dashboard.html',
+};
+
+// JWT secret for signing tokens
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+
 // LOGIN ROUTE
 app.post(LOGIN_ROUTE, (req, res) => {
   const { password } = req.body;
@@ -39,26 +48,62 @@ app.post(LOGIN_ROUTE, (req, res) => {
   console.log('Matched role:', role);
 
   if (role) {
-    // If the role is 'ceo', redirect to the CEO dashboard
-    if (role === 'ceo') {
-      return res.redirect('https://weconnectf.onrender.com/mceo-dashboard.html');
-    }
-    else if (role === 'manager') {
-      return res.redirect('/mmanager-dashboard.html');
-    }
-    else if (role === 'artist') {
-      return res.redirect('/martist-dashboard.html');
-    }
-    else if (role === 'reporter') {
-      return res.redirect('/mreporter-dashboard.html');
-    }
+    // Generate JWT token
+    const token = jwt.sign({ role }, JWT_SECRET, { expiresIn: '1h' });
 
-    // Otherwise, redirect to the generic roles page
-    return res.redirect(`/roles.html?role=${role}`);
+    // Send token to the client (set as a cookie or in the response body)
+    res.cookie('auth_token', token, { httpOnly: true, secure: true }); // secure flag for HTTPS
+    return res.redirect(redirectUrls[role]);
   }
 
-  // If no role matches
   res.status(401).send('<h2>❌ Access denied</h2>');
+});
+
+// Middleware to verify JWT for protected routes
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.auth_token || req.headers['authorization']?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send('<h2>❌ Unauthorized</h2>');
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send('<h2>❌ Invalid token</h2>');
+    }
+    req.user = decoded; // attach the user role to the request
+    next();
+  });
+};
+
+// Protected Routes
+app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
+  if (req.user.role !== 'ceo') {
+    return res.status(403).send('<h2>❌ Forbidden</h2>');
+  }
+  res.sendFile(path.join(__dirname, 'mceo-dashboard.html'));
+});
+
+app.get('/mmanager-dashboard.html', verifyToken, (req, res) => {
+  if (req.user.role !== 'manager') {
+    return res.status(403).send('<h2>❌ Forbidden</h2>');
+  }
+  res.sendFile(path.join(__dirname, 'mmanager-dashboard.html'));
+});
+
+// Similar protected routes for artist and reporter
+app.get('/martist-dashboard.html', verifyToken, (req, res) => {
+  if (req.user.role !== 'artist') {
+    return res.status(403).send('<h2>❌ Forbidden</h2>');
+  }
+  res.sendFile(path.join(__dirname, 'martist-dashboard.html'));
+});
+
+app.get('/mreporter-dashboard.html', verifyToken, (req, res) => {
+  if (req.user.role !== 'reporter') {
+    return res.status(403).send('<h2>❌ Forbidden</h2>');
+  }
+  res.sendFile(path.join(__dirname, 'mreporter-dashboard.html'));
 });
 
 // Start the server
