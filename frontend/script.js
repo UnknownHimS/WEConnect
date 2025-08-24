@@ -1,4 +1,4 @@
-const API_URL = 'https://weconnectb.onrender.com'; // Replace after deploy!
+const API_URL = 'https://weconnectb.onrender.com/api/users'; // Add the full endpoint
 
 const userForm = document.getElementById('user-form');
 const usersList = document.getElementById('users');
@@ -27,4 +27,3 @@ userForm.addEventListener('submit', async (e) => {
 
 // Load users on page load
 fetchUsers();
-
