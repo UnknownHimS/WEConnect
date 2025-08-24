@@ -1,64 +1,40 @@
-// Visitor Name Form Submission
-const visitorForm = document.getElementById('visitor-form');
-const visitorNameInput = document.getElementById('visitor-name');
+const API_URL = `https://weconnectb.onrender.com`;  // Replace with your backend URL once deployed
 
-// Login Form Submission
-const loginForm = document.getElementById('login-form');
-const usernameInput = document.getElementById('username');
-const loginPasswordInput = document.getElementById('login-password');
-
-// Function to handle visitor name submission
-visitorForm.addEventListener('submit', async (e) => {
+// Handle adding a visitor
+document.getElementById('user-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const visitorName = visitorNameInput.value.trim();
-  
-  if (!visitorName) return alert('Please enter a valid name.');
+  const name = document.getElementById('name').value.trim();
+  if (!name) return;
 
-  try {
-    const response = await fetch('https://weconnectb.onrender.com/api/visitor', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: visitorName }),
-    });
-    
-    if (response.ok) {
-      alert('Your name has been added!');
-    } else {
-      alert('Error adding name.');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Error adding name.');
-  }
+  const res = await fetch(`${API_URL}/api/visitor`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await res.json();
+  alert(data.message);  // Show success/error message
+  document.getElementById('name').value = '';  // Clear the input field
 });
 
-// Function to handle staff login
-loginForm.addEventListener('submit', async (e) => {
+// Handle login form submission
+document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const username = usernameInput.value.trim();
-  const password = loginPasswordInput.value.trim();
-  
-  if (!username || !password) return alert('Please enter both username and password.');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) return;
 
-  try {
-    const response = await fetch('https://weconnectb.onrender.com/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+  const res = await fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
 
-    const result = await response.json();
-    
-    if (response.ok) {
-      alert('Login successful!');
-      // Redirect to the appropriate dashboard after successful login
-      window.location.href = result.redirectUrl;
-    } else {
-      alert(result.message);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Login failed.');
+  const data = await res.json();
+  if (res.ok) {
+    alert('Login successful! Redirecting...');
+    window.location.href = data.redirectUrl;  // Redirect based on role
+  } else {
+    alert(data.message);  // Show login error message
   }
 });
