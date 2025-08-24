@@ -1,29 +1,33 @@
-const API_URL = 'https://weconnectb.onrender.com/api/users'; // Add the full endpoint
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('user-form');
+  const userList = document.getElementById('users');
 
-const userForm = document.getElementById('user-form');
-const usersList = document.getElementById('users');
+  const loadUsers = async () => {
+    const res = await fetch('/api/users');
+    const users = await res.json();
+    userList.innerHTML = '';
+    users.forEach(user => {
+      const li = document.createElement('li');
+      li.textContent = user.name;
+      userList.appendChild(li);
+    });
+  };
 
-async function fetchUsers() {
-  const res = await fetch(API_URL);
-  const users = await res.json();
-  usersList.innerHTML = users.map(u => `<li>${u.name}</li>`).join('');
-}
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
 
-userForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const nameInput = document.getElementById('name');
-  const name = nameInput.value.trim();
-  if (!name) return;
+    if (!name) return;
 
-  await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
+    await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+
+    document.getElementById('name').value = '';
+    loadUsers();
   });
 
-  nameInput.value = '';
-  fetchUsers();
+  loadUsers();
 });
-
-// Load users on page load
-fetchUsers();
