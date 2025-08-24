@@ -1,28 +1,37 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 2rem;
-  max-width: 600px;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f4;
 }
+
 h1 {
   color: #333;
 }
+
 form {
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
-input, button {
-  padding: 0.5rem;
-  font-size: 1rem;
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
-ul {
-  list-style: none;
-  padding: 0;
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
-li {
-  background: #f4f4f4;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
+
+button:hover {
+  background-color: #45a049;
 }
-a {
-  display: inline-block;
-  margin-top: 1rem;
+
+#message {
+  color: green;
 }
