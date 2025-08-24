@@ -38,6 +38,7 @@ const roles = {
 };
 
 // LOGIN ROUTE
+// LOGIN ROUTE
 app.post(LOGIN_ROUTE, (req, res) => {
   const { password } = req.body;
   console.log('Login attempt:', password);
@@ -46,30 +47,26 @@ app.post(LOGIN_ROUTE, (req, res) => {
   console.log('Matched role:', role);
 
   if (role) {
-    // If the role is 'ceo', redirect to the CEO dashboard
+    // If the role is 'ceo', send a redirect URL for the CEO dashboard
     if (role === 'ceo') {
-      window.location.href = `/mceo-dashboard.html`;
+      return res.json({ redirectUrl: '/mceo-dashboard.html' });
     }
-    else if (role === 'manager'){
-      window.location.href = `/mmanager-dashboard.html`;
-
+    else if (role === 'manager') {
+      return res.json({ redirectUrl: '/mmanager-dashboard.html' });
     }
-    else if (role === 'artist'){
-     window.location.href = `/martist-dashboard.html`;
-
+    else if (role === 'artist') {
+      return res.json({ redirectUrl: '/martist-dashboard.html' });
     }
-    else if (role === 'reporter'){
-      window.location.href = `/mreporter-dashboard.html`;
-
+    else if (role === 'reporter') {
+      return res.json({ redirectUrl: '/mreporter-dashboard.html' });
     }
 
     // Otherwise, redirect to the generic roles page
-    return res.redirect(`/roles.html?role=${role}`);
+    return res.json({ redirectUrl: `/roles.html?role=${role}` });
   }
 
   res.status(401).send('<h2>❌ Access denied</h2>');
 });
-
 
 // API: Get all users
 app.get('/api/users', async (req, res) => {
