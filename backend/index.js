@@ -51,59 +51,7 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-// === New role-password map (hardcoded for demo) ===
-const rolePasswords = {
-  ceo: "ceo-secret",
-  manager: "manager-secret",
-  reporter: "reporter-secret",
-  artist: "artist-secret"
-};
 
-// Login endpoint
-app.post('/login', (req, res) => {
-  const { role, password } = req.body;
-
-  if (!rolePasswords[role]) {
-    return res.status(400).json({ error: "Invalid role" });
-  }
-
-  if (rolePasswords[role] === password) {
-    return res.json({ message: "Login successful", role });
-  } else {
-    return res.status(401).json({ error: "Incorrect password" });
-  }
-});
-
-// Middleware to authorize roles (using query param role)
-function authorizeRole(role) {
-  return (req, res, next) => {
-    if (req.query.role === role) {
-      next();
-    } else {
-      res.status(403).json({ error: "Forbidden: Access denied" });
-    }
-  };
-}
-
-// Example manager protected route, fetching users from DB
-app.get('/manager/data', authorizeRole('manager'), async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM users ORDER BY id');
-    res.json({
-      message: "Manager Dashboard Data",
-      users: result.rows,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Reporter example route
-app.get('/reporter/data', authorizeRole('reporter'), (req, res) => {
-  res.json({ message: "Reporter Dashboard Data" });
-});
-
-// Add other role routes as needed...
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
