@@ -46,11 +46,27 @@ app.post(LOGIN_ROUTE, (req, res) => {
   console.log('Matched role:', role);
 
   if (role) {
+    // If the role is 'ceo', redirect to the CEO dashboard
+    if (role === 'ceo') {
+      return res.redirect('/mceo-dashboard.html');
+    }
+    else if (role === 'manager'){
+      return res.redirect('/mmanager-dashboard.html');
+    }
+    else if (role === 'artist'){
+      return res.redirect('/martist-dashboard.html');
+    }
+    else if (role === 'reporter'){
+      return res.redirect('/mreporter-dashboard.html');
+    }
+
+    // Otherwise, redirect to the generic roles page
     return res.redirect(`/roles.html?role=${role}`);
   }
 
   res.status(401).send('<h2>❌ Access denied</h2>');
 });
+
 
 // API: Get all users
 app.get('/api/users', async (req, res) => {
