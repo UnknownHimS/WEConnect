@@ -1,28 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const userList = document.getElementById('users');
-  const loadingMessage = document.getElementById('loading-message');
+const API_URL = 'https://weconnectb.onrender.com/api/users'; // Backend API for users
 
-  const loadUsers = async () => {
-    loadingMessage.textContent = 'Loading users...';
-    try {
-      const res = await fetch('https://weconnectb.onrender.com/api/users');
-      if (!res.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const users = await res.json();
-      userList.innerHTML = ''; // Clear existing user list
+// Selecting the list element where users will be displayed
+const usersList = document.getElementById('users');
 
-      users.forEach(user => {
-        const li = document.createElement('li');
-        li.textContent = user.name;
-        userList.appendChild(li);
-      });
+// Fetch and display users
+async function fetchUsers() {
+  try {
+    const res = await fetch(API_URL);
+    const users = await res.json();
+    usersList.innerHTML = users.map(u => `<li>${u.name}</li>`).join('');
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    usersList.innerHTML = '<li>Failed to load users.</li>';
+  }
+}
 
-      loadingMessage.textContent = ''; // Clear loading message
-    } catch (error) {
-      loadingMessage.textContent = `Error: ${error.message}`;
-    }
-  };
-
-  loadUsers(); // Load users as soon as the dashboard page is loaded
-});
+// Load users on page load
+fetchUsers();
