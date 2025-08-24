@@ -1,4 +1,4 @@
-const API_URL = 'https://your-backend-url.onrender.com/api/users'; // Replace after deploy!
+const API_URL = 'https://weconnectb.onrender.com'; // Replace after deploy!
 
 const userForm = document.getElementById('user-form');
 const usersList = document.getElementById('users');
@@ -27,3 +27,4 @@ userForm.addEventListener('submit', async (e) => {
 
 // Load users on page load
 fetchUsers();
+
