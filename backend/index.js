@@ -1,125 +1,117 @@
-require('dotenv').config();
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { Pool } = require('pg');
-const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+const { Client } = require('pg');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const path = require('path');
+require('dotenv').config();  // Load environment variables
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors({
-  origin: 'https://weconnectb.onrender.com', // Allow frontend domain
-  methods: ['GET', 'POST'], // Allowed methods
-  credentials: true, // Allow cookies with requests
-}));
-app.use(express.json());  // Express's built-in JSON parser
-app.use(express.urlencoded({ extended: false })); // Express's built-in URL-encoded parser
-app.use(cookieParser());  // To parse cookies for JWT
+app.use(express.json());
+app.use(cors());  // For cross-origin requests
 
-// PostgreSQL setup
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+// Connect to PostgreSQL using Render's DATABASE_URL from the .env file
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,  // Database URL from .env
+  ssl: { rejectUnauthorized: false },  // Enable SSL for secure connection
 });
 
-// Environment role passwords
-const LOGIN_ROUTE = process.env.LOGIN_ROUTE || '/login';
-const roles = {
-  [process.env.CEO_PASS]: 'ceo',
-  [process.env.MANAGER]: 'manager',
-  [process.env.ARTIST]: 'artist',
-  [process.env.REPORTER]: 'reporter',
-};
+client.connect()
+  .then(() => console.log('Connected to PostgreSQL database'))
+  .catch(err => console.error('Database connection error:', err.stack));
 
-// JWT Authentication Middleware
-const verifyToken = (req, res, next) => {
-  const token = req.cookies.auth_token || req.headers['authorization']?.split(' ')[1];
+// Login Route: Validate role and password
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).send('Username and password are required');
 
-  if (!token) {
-    return res.status(401).send('<h2>❌ Unauthorized</h2>');
-  }
+  try {
+    // Check if user exists in the database
+    const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).send('<h2>❌ Invalid or expired token</h2>');
+    if (!user) return res.status(404).send('User not found');
+
+    // Check password based on role
+    let validPassword = false;
+    switch (user.role) {
+      case 'CEO':
+        validPassword = password === process.env.CEO_PASS;
+        break;
+      case 'Manager':
+        validPassword = password === process.env.MANAGER;
+        break;
+      case 'Artist':
+        validPassword = password === process.env.ARTIST;
+        break;
+      case 'Reporter':
+        validPassword = password === process.env.REPORTER;
+        break;
+      default:
+        return res.status(403).send('Role not recognized');
     }
-    req.user = decoded; // Attach decoded data to the request
-    next();
-  });
-};
 
-// LOGIN ROUTE
-app.post(LOGIN_ROUTE, (req, res) => {
-  const { password } = req.body;
-  console.log('Login attempt with password:', password);
+    if (!validPassword) return res.status(401).send('Invalid credentials');
 
-  const role = roles[password];
-  console.log('Matched role:', role);
+    // Role-based redirect URL
+    let redirectUrl;
+    switch (user.role) {
+      case 'CEO':
+        redirectUrl = process.env.REDIRECT_URL_CEO;
+        break;
+      case 'Manager':
+        redirectUrl = process.env.REDIRECT_URL_MANAGER;
+        break;
+      case 'Artist':
+        redirectUrl = process.env.REDIRECT_URL_ARTIST;
+        break;
+      case 'Reporter':
+        redirectUrl = process.env.REDIRECT_URL_REPORTER;
+        break;
+      default:
+        return res.status(403).send('Role not recognized');
+    }
 
-  if (role) {
-    // Generate JWT token for the user
-    const token = jwt.sign({ role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('auth_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    // Send success response with redirect URL
+    res.json({ message: 'Login successful!', redirectUrl });
 
-    // Redirect based on the role
-    const redirectUrl = process.env[`REDIRECT_URL_${role.toUpperCase()}`];
-    return res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).send('Server error');
   }
-
-  res.status(401).send('<h2>❌ Access denied</h2>');
 });
 
-// Protected Route: Dashboard URL
-app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
-  if (req.user.role === 'ceo') {
-    res.sendFile(path.join(__dirname, 'frontend', 'mceo-dashboard.html')); // Serve the CEO dashboard
+// Second Password Route for dashboard access (after redirect)
+app.post('/verify-second-password', (req, res) => {
+  const { role, secondPassword } = req.body;
+  let validSecondPassword = false;
+
+  // Validate second password based on role
+  switch (role) {
+    case 'CEO':
+      validSecondPassword = secondPassword === process.env.CEO_PASS;
+      break;
+    case 'Manager':
+      validSecondPassword = secondPassword === process.env.MANAGER;
+      break;
+    case 'Artist':
+      validSecondPassword = secondPassword === process.env.ARTIST;
+      break;
+    case 'Reporter':
+      validSecondPassword = secondPassword === process.env.REPORTER;
+      break;
+    default:
+      return res.status(403).send('Role not recognized');
+  }
+
+  if (validSecondPassword) {
+    return res.json({ message: 'Password verified! Access granted.' });
   } else {
-    res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
+    return res.status(401).send('Invalid second password');
   }
 });
-
-// Similarly, for other roles
-app.get('/mmanager-dashboard.html', verifyToken, (req, res) => {
-  if (req.user.role === 'manager') {
-    res.sendFile(path.join(__dirname, 'frontend', 'mmanager-dashboard.html'));
-  } else {
-    res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
-  }
-});
-
-// API Endpoint to fetch users (you can extend this with user authentication or role-based filtering)
-app.get('/api/users', verifyToken, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM users'); // Query your users from DB
-    res.json(result.rows); // Send users as JSON
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// API Endpoint to add a user (this is just an example, you may want to extend this)
-app.post('/api/users', verifyToken, async (req, res) => {
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: 'Name is required' });
-  }
-
-  try {
-    const result = await pool.query('INSERT INTO users (name) VALUES ($1) RETURNING *', [name]);
-    res.status(201).json(result.rows[0]); // Send back the created user
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Serve static files for the frontend (if necessary)
-app.use(express.static(path.join(__dirname, 'frontend')));
 
 // Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
