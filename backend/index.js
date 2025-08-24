@@ -38,7 +38,7 @@ const roles = {
 };
 
 // LOGIN ROUTE
-// LOGIN ROUTE
+
 app.post(LOGIN_ROUTE, (req, res) => {
   const { password } = req.body;
   console.log('Login attempt:', password);
