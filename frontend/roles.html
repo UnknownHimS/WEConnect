@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Role</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Welcome!</h1>
+  <p id="role-display">Loading your role...</p>
+  <a href="/dashboard.html">➡ Go to User Dashboard</a>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+
+    const roleDisplay = document.getElementById('role-display');
+    switch (role) {
+      case 'ceo':
+        roleDisplay.textContent = "👑 You are logged in as: CEO";
+        break;
+      case 'manager':
+        roleDisplay.textContent = "📋 You are logged in as: Manager";
+        break;
+      case 'artist':
+        roleDisplay.textContent = "🎨 You are logged in as: Artist";
+        break;
+      case 'reporter':
+        roleDisplay.textContent = "📝 You are logged in as: Reporter";
+        break;
+      default:
+        roleDisplay.textContent = "❌ Role not found.";
+    }
+  </script>
+</body>
+</html>
