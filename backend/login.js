@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.post(LOGIN_ROUTE, (req, res) => {
   const enteredPassword = req.body.password;
 
-  if (enteredPassword == CEO_PASS) {
+  if (enteredPassword === CEO_PASS) {
     res.redirect('/mndex.html');
   } else {
     res.send('<h2>❌ Access denied</h2>');
@@ -30,4 +30,5 @@ app.post(LOGIN_ROUTE, (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
