@@ -1,4 +1,4 @@
-const API_URL = `https://weconnectb.onrender.com`;  // Replace with your backend URL once deployed
+const API_URL = 'https://weconnectb.onrender.com';  // Replace with your backend URL once deployed
 
 // Handle adding a visitor
 document.getElementById('user-form').addEventListener('submit', async (e) => {
@@ -38,3 +38,4 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     alert(data.message);  // Show login error message
   }
 });
+
