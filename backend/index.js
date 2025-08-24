@@ -4,15 +4,20 @@ const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const cookieParser = require('cookie-parser'); // Add cookie parser
+const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json()); // Express's built-in JSON parser
+app.use(cors({
+  origin: 'https://weconnectb.onrender.com', // Allow frontend domain
+  methods: ['GET', 'POST'], // Allowed methods
+  credentials: true, // Allow cookies with requests
+}));
+app.use(express.json());  // Express's built-in JSON parser
 app.use(express.urlencoded({ extended: false })); // Express's built-in URL-encoded parser
-app.use(cookieParser()); // Add cookie-parser for reading cookies
+app.use(cookieParser());  // To parse cookies for JWT
 
 // PostgreSQL setup
 const pool = new Pool({
@@ -67,13 +72,10 @@ app.post(LOGIN_ROUTE, (req, res) => {
   res.status(401).send('<h2>❌ Access denied</h2>');
 });
 
-// Serve static files (frontend)
-app.use(express.static('frontend'));
-
 // Protected Route: Dashboard URL
 app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
   if (req.user.role === 'ceo') {
-    res.sendFile(path.join(__dirname, 'frontend/mceo-dashboard.html')); // Serve the CEO dashboard
+    res.sendFile(path.join(__dirname, 'frontend', 'mceo-dashboard.html')); // Serve the CEO dashboard
   } else {
     res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
   }
@@ -82,11 +84,39 @@ app.get('/mceo-dashboard.html', verifyToken, (req, res) => {
 // Similarly, for other roles
 app.get('/mmanager-dashboard.html', verifyToken, (req, res) => {
   if (req.user.role === 'manager') {
-    res.sendFile(path.join(__dirname, 'frontend/mmanager-dashboard.html'));
+    res.sendFile(path.join(__dirname, 'frontend', 'mmanager-dashboard.html'));
   } else {
     res.status(403).send('<h2>❌ Forbidden: Invalid access</h2>');
   }
 });
+
+// API Endpoint to fetch users (you can extend this with user authentication or role-based filtering)
+app.get('/api/users', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users'); // Query your users from DB
+    res.json(result.rows); // Send users as JSON
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API Endpoint to add a user (this is just an example, you may want to extend this)
+app.post('/api/users', verifyToken, async (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+
+  try {
+    const result = await pool.query('INSERT INTO users (name) VALUES ($1) RETURNING *', [name]);
+    res.status(201).json(result.rows[0]); // Send back the created user
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Serve static files for the frontend (if necessary)
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // Start the server
 const PORT = process.env.PORT || 3000;
