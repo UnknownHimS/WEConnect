@@ -37,25 +37,22 @@ app.post(LOGIN_ROUTE, (req, res) => {
   console.log('Matched role:', role);
 
   if (role) {
-    let redirectUrl = '';
-
-    // Map the role to the dashboard URL
+    // If the role is 'ceo', redirect to the CEO dashboard
     if (role === 'ceo') {
-      redirectUrl = '/mceo-dashboard.html';
-    } else if (role === 'manager') {
-      redirectUrl = '/mmanager-dashboard.html';
-    } else if (role === 'artist') {
-      redirectUrl = '/martist-dashboard.html';
-    } else if (role === 'reporter') {
-      redirectUrl = '/mreporter-dashboard.html';
+      return res.redirect('/mceo-dashboard.html');
+    }
+    else if (role === 'manager') {
+      return res.redirect('/mmanager-dashboard.html');
+    }
+    else if (role === 'artist') {
+      return res.redirect('/martist-dashboard.html');
+    }
+    else if (role === 'reporter') {
+      return res.redirect('/mreporter-dashboard.html');
     }
 
     // Otherwise, redirect to the generic roles page
-    if (!redirectUrl) {
-      redirectUrl = `/roles.html?role=${role}`;
-    }
-
-    return res.json({ redirectUrl });
+    return res.redirect(`/roles.html?role=${role}`);
   }
 
   // If no role matches
