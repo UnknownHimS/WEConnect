@@ -2,13 +2,13 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { Client } = require('pg');
 require('dotenv').config(); // Load environment variables
-const cors = require('cors'); // Enable CORS
+const cors = require('cors'); // Enable CORS support
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); // For parsing JSON requests
-app.use(cors()); // Enable CORS support
+app.use(cors()); // Enable CORS
 
 // Connect to PostgreSQL
 const client = new Client({
@@ -71,39 +71,9 @@ app.post('/login', async (req, res) => {
     }
 
     res.json({ message: 'Login successful!', redirectUrl });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).send({ message: 'Server error' });
-  }
-});
-
-// Second Password Route for dashboard access
-app.post('/verify-second-password', (req, res) => {
-  const { role, secondPassword } = req.body;
-  let validSecondPassword = false;
-
-  switch (role) {
-    case 'CEO':
-      validSecondPassword = secondPassword === process.env.CEO_PASS;
-      break;
-    case 'Manager':
-      validSecondPassword = secondPassword === process.env.MANAGER_PASS;
-      break;
-    case 'Artist':
-      validSecondPassword = secondPassword === process.env.ARTIST_PASS;
-      break;
-    case 'Reporter':
-      validSecondPassword = secondPassword === process.env.REPORTER_PASS;
-      break;
-    default:
-      return res.status(403).send({ message: 'Role not recognized' });
-  }
-
-  if (validSecondPassword) {
-    return res.json({ message: 'Password verified! Access granted.' });
-  } else {
-    return res.status(401).send({ message: 'Invalid second password' });
   }
 });
 
