@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/mine.env' });
+require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
