@@ -2,25 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>CEO Dashboard - Add User & Login</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Visitors Name: </h1>
+  <h1>Visitors Name:</h1>
   <form id="user-form">
     <input type="text" id="name" placeholder="Enter user name" required />
     <button type="submit">Add User</button>
   </form>
 
   <h1>🔐 Login</h1>
-  <form action="https://weconnectb.onrender.com/login" method="POST">
-    <input type="password" name="password" placeholder="Enter your password" required />
+  <form id="login-form">
+    <input type="password" id="password" name="password" placeholder="Enter your password" required />
     <button type="submit">Login</button>
   </form>
 
-  <script src="script.js"></script>
+  <script src="script.js"></script> <!-- Common script for both -->
 </body>
 </html>
-
-
-
