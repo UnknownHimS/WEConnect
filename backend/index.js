@@ -1,23 +1,26 @@
 // Load env variables
-require('dotenv').config({ path: __dirname + '/postgre.env' });
-
+require('dotenv').config({ path: __dirname + '/mine.env' });
 const express = require('express');
-const cors = require('cors');
+const path = require('path');
 const { Pool } = require('pg');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// PostgreSQL connection pool
+// PostgreSQL setup
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: { rejectUnauthorized: false },
 });
 
-// Create users table if not exists
+// Ensure 'users' table exists
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -25,8 +28,29 @@ pool.query(`
   );
 `).catch(console.error);
 
-// Your existing user routes:
+// Environment role passwords
+const LOGIN_ROUTE = process.env.LOGIN_ROUTE || '/login';
 
+const roles = {
+  [process.env.CEO_PASS]: 'ceo',
+  [process.env.MANAGER]: 'manager',
+  [process.env.ARTIST]: 'artist',
+  [process.env.REPORTER]: 'reporter',
+};
+
+// LOGIN ROUTE
+app.post(LOGIN_ROUTE, (req, res) => {
+  const { password } = req.body;
+
+  const role = roles[password];
+  if (role) {
+    return res.redirect(`/roles.html?role=${role}`);
+  }
+
+  res.status(401).send('<h2>❌ Access denied</h2>');
+});
+
+// API: Get all users
 app.get('/api/users', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users ORDER BY id');
@@ -36,6 +60,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// API: Add a new user
 app.post('/api/users', async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
@@ -51,6 +76,11 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
 
 
 const PORT = process.env.PORT || 3000;
