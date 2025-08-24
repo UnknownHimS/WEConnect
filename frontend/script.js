@@ -1,55 +1,68 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const userForm = document.getElementById('user-form');
-  const loginForm = document.getElementById('login-form');
-  const loadingMessage = document.getElementById('loading-message');
-  
-  // Handle Add User form submission
-  userForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('name').value;
+const API_URL = 'https://weconnectb.onrender.com/api/users'; // Backend API for users
 
-    if (!name) return;
+// Selecting the forms
+const userForm = document.getElementById('user-form');
+const loginForm = document.getElementById('login-form');
 
-    try {
-      const res = await fetch('https://weconnectb.onrender.com/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
+// Fetch and display users
+async function fetchUsers() {
+  try {
+    const res = await fetch(API_URL);
+    const users = await res.json();
+    const usersList = document.getElementById('users');
+    usersList.innerHTML = users.map(u => `<li>${u.name}</li>`).join('');
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  }
+}
 
-      if (!res.ok) {
-        throw new Error('Failed to add user');
-      }
+// Handle Add User form submission
+userForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nameInput = document.getElementById('name');
+  const name = nameInput.value.trim();
+  if (!name) return;
 
-      document.getElementById('name').value = '';
-      alert('User added successfully');
-    } catch (error) {
-      alert(`Error: ${error.message}`);
-    }
-  });
-
-  // Handle Login form submission
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const password = document.getElementById('password').value;
-
-    if (!password) return;
-
-    try {
-      const res = await fetch('https://weconnectb.onrender.com/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to login');
-      }
-
-      // Redirect to CEO Dashboard after login
-      window.location.href = 'mceo-dashboard.html'; // Redirect to dashboard
-    } catch (error) {
-      alert(`Error: ${error.message}`);
-    }
-  });
+  try {
+    // Sending a POST request to add the user
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    nameInput.value = ''; // Clear input field after submitting
+    fetchUsers(); // Refresh the user list
+  } catch (error) {
+    alert('Error adding user');
+    console.error('Error adding user:', error);
+  }
 });
+
+// Handle Login form submission
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const passwordInput = document.getElementById('password');
+  const password = passwordInput.value.trim();
+
+  if (!password) return;
+
+  try {
+    const res = await fetch('https://weconnectb.onrender.com/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    if (res.ok) {
+      window.location.href = 'mceo-dashboard.html'; // Redirect to dashboard after login
+    } else {
+      alert('Login failed. Please try again.');
+    }
+  } catch (error) {
+    alert('Error logging in');
+    console.error('Login error:', error);
+  }
+});
+
+// Initial load of users
+fetchUsers();
